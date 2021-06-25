@@ -1,0 +1,2 @@
+[ROS_SETTINGS]
+GPS_subscriber = "/ublox_gps_raw"
