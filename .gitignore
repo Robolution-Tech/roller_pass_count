@@ -1,4 +1,5 @@
 *.pyc
 /pass_count/*.pyc
 .DS_Store
+.vscode
 .circleci
