@@ -1,4 +1,5 @@
 import math
+from time import time
 import cv2
 import numpy as np
 
@@ -81,43 +82,45 @@ def add_icon(icon, angle, loc, bg_img):
     y1, y2 = y_off, y_off + icon_dst.shape[0]
     x1, x2 = x_off, x_off + icon_dst.shape[1]
 
-    # print(loc,x_off,y_off, y1,y2, x1,x2)
+    bg_w = bg_img.shape[1]
+    bg_h = bg_img.shape[0]
 
     alpha_s = icon_dst[:, :, 3] / 255.0
     alpha_l = 1.0 - alpha_s
+    panning = 100
+
+    bg_tmp_w = bg_w + panning*2
+    bg_tmp_h = bg_h + panning*2
+    bg_tmp_d = bg_img.shape[2]
+
+    
+    
     for c in range(0, 3):
-        bg_img[y1:y2, x1:x2, c] = (alpha_s * icon_dst[:, :, c] + alpha_l * bg_img[y1:y2, x1:x2, c])
+        
+        
+
+        if x1 >=0 and x2 <= bg_w and y1 >= 0 and y2 <= bg_h:
+            # print('add icon c {}, case 1 '.format(c))
+            bg_img[y1:y2, x1:x2, c] = ( alpha_s * icon_dst[:, :, c] + alpha_l * bg_img[y1:y2, x1:x2, c] )
+        elif not ( x2 < 0 or x1 > bg_w or y1 > bg_h or y2 < 0 ):
+            
+            # print('add icon c {}, case 2 '.format(c))
+            # print('tmp size {} {} {}'.format( bg_tmp_h, bg_tmp_w, bg_tmp_d  ))
+            
+            t1 = time()
+            bg_tmp = np.zeros(( bg_tmp_h, bg_tmp_w, bg_tmp_d)).astype(np.uint8)
+            t2 = time()
+            bg_tmp[panning:panning+bg_h, panning:panning+bg_w] = bg_img 
+            new_x1 = x1 + panning
+            new_x2 = x2 + panning
+            new_y1 = y1 + panning
+            new_y2 = y2 + panning
+            bg_tmp[new_y1:new_y2, new_x1:new_x2, c] = ( alpha_s * icon_dst[:, :, c] + alpha_l * bg_tmp[new_y1:new_y2, new_x1:new_x2, c] )
+            bg_img = bg_tmp[panning:panning+bg_h, panning:panning+bg_w]
+            t3 = time()
+            # print('time in case 2, {} {} ms'.format( int( (t2-t1)*1000 ), int( (t3-t2)*1000 ) ) )
+
+        # bg_img[y1:y2, x1:x2, c] = ( alpha_s * icon_dst[:, :, c] + alpha_l * bg_img[y1:y2, x1:x2, c] )
+
     return bg_img
-
-# img = cv2.imread("img_17.png", -1)
-# # img_a = cv2.cvtColor(img, cv2.COLOR_BGRA2RGBA)
-# icon = cv2.imread("roller_icon.png", -1)
-# height, width = (icon.shape[0] , icon.shape[1])
-# center = (width/2,height/2)
-# size = (width, height)
-# angle = 45.0
-# scale = 0.5
-
-# rotation_matrix = cv2.getRotationMatrix2D(center, angle, scale)
-# # icon_dst = cv2.warpAffine(icon, rotation_matrix, size,
-# #                          flags=cv2.INTER_LINEAR,
-# #                          borderMode=cv2.BORDER_TRANSPARENT)
-# icon_dst = rotate_image(icon, 45)
-
-# cv2.imshow("b", icon_dst)
-# x_offset = int((img.shape[1] - icon_dst.shape[1])/2)
-# y_offset =  int((img.shape[0] - icon_dst.shape[0])/2)
-
-# y1, y2 = y_offset, y_offset +icon_dst.shape[0]
-# x1, x2 = x_offset, x_offset + icon_dst.shape[1]
-
-# alpha_s = icon_dst[:, :, 3] / 255.0
-# alpha_l = 1.0 - alpha_s
-
-# for c in range(0, 3):
-#     img[y1:y2, x1:x2, c] = (alpha_s * icon_dst[:, :, c] + alpha_l * img[y1:y2, x1:x2, c])
-
-# cv2.imshow("a", img)
-# cv2.waitKey(0)
-
 

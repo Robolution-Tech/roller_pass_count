@@ -15,7 +15,7 @@ from std_msgs.msg import Bool, String, Int32MultiArray
 from os import listdir
 from os.path import isfile, join
 import threading
-from helpers import *
+from tools.helpers import *
 
 
 class MapDownloader:
@@ -49,11 +49,11 @@ class MapDownloader:
         print("Now downloading x: {}, y: {} tile".format(x_indx, y_indx))
         center_lon = self.all_tile_center_lons[x_indx]
         center_lat = self.all_tile_center_lats[y_indx]
-        img_name = os.path.join("maps", "{}_{}.jpg".format(x_indx, y_indx))
+        img_name = os.path.join("../data/maps", "{}_{}.jpg".format(x_indx, y_indx))
         gen_map(center_lon, center_lat, self.zoom_level, self.img_resolution, img_name)
         # empty_array = np.uint8((self.img_resolution, self.img_resolution,1))
         empty_array = np.zeros((self.img_resolution, self.img_resolution)).astype(np.uint8)
-        npy_name = os.path.join("maps", "{}_{}.npy".format(x_indx, y_indx))
+        npy_name = os.path.join("../data/maps", "{}_{}.npy".format(x_indx, y_indx))
         np.save( npy_name, empty_array )
         self.download_queue.remove((x_indx, y_indx))
 
@@ -72,7 +72,7 @@ class MapDownloader:
         y_check_list = range(y_index-self.cache_size, y_index+self.cache_size+1)
         for x in x_check_list:
             for y in y_check_list:
-                if not os.path.exists(os.path.join("maps", "{}_{}.jpg".format(x, y))):
+                if not os.path.exists(os.path.join("../data/maps", "{}_{}.jpg".format(x, y))):
                     download_list.add((x, y))
         self.download_queue = self.download_queue.union(download_list)
     

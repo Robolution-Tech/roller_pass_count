@@ -6,7 +6,7 @@ import numpy as np
 class gen_tiles_coord():
     def __init__(self):
         # load origin latitude and lonitude values
-        origin_f = open('lat_lon_global_config.json', 'r')
+        origin_f = open('../lat_lon_global_config.json', 'r')
         f_content = json.load(origin_f)
         self.kLat_origin_center, self.kLon_origin_center = f_content["lat_origin_tile_center"], f_content["lon_origin_tile_center"]
         self.kMax_lat, self.kMax_lon  = f_content["max_lat"], f_content["max_lon"]
@@ -67,7 +67,7 @@ class gen_tiles_coord():
         output_content = {"lat_length":len(self.lat_centers_list), "lon_length":len(self.lon_centers_list), "lat_centers_list":self.lat_centers_list, "lon_centers_list":self.lon_centers_list}
         output_content["lat_tile_range"] = self.lat_corners_list
         output_content["lon_tile_range"] = self.lon_corners_list
-        global_tile_coord_file = open('global_tile_coord.json', 'w')
+        global_tile_coord_file = open('../global_tile_coord.json', 'w')
         json.dump(output_content, global_tile_coord_file, indent=2)
         global_tile_coord_file.close()
 
