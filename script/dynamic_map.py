@@ -50,11 +50,13 @@ class gps2grid():
         self.my_id = proj_config['self_id']
 
         self.other_dev_latlon = {}
-        self.other_pass_progress = []
+        # self.other_pass_progress = []
+        self.other_pass_progress = {}
         self.other_dev_uv = []
         for i in range(self.number_of_devices ):
             self.other_dev_latlon[ device_id_list[i] ] = [ ]
-            self.other_pass_progress.append(0)
+            self.other_pass_progress[ device_id_list[i] ] = 0
+            # self.other_pass_progress.append(0)
             self.other_dev_uv.append( [80,80] )
 
         print('device_id_list')
@@ -65,6 +67,9 @@ class gps2grid():
         
         print('other_dev_latlon')
         print(self.other_dev_latlon)
+
+        print('other_pass_progress')
+        print(self.other_pass_progress)
 
         self.my_uv = [0,0]
 
@@ -128,6 +133,7 @@ class gps2grid():
         self.pass_width = 4
 
         self.roller_orientation = 0.0
+        self.roller_orientation_last = 0.0
 
         self.chech_small_movement = False 
         self.small_move_critiria = 3
@@ -226,6 +232,9 @@ class gps2grid():
         # print("\nthis is callback  2  \n  other device gps lists length ")
         # print( len(self.other_dev_latlon[1]) , len(self.other_dev_latlon[2]) )
 
+        # print('other_dev_latlon')
+        # print(self.other_dev_latlon)
+
 
         # update the grid
         if self.other_grid_ready:
@@ -236,29 +245,39 @@ class gps2grid():
                 # print('\n ****************\n  callback 2 , updating grid2  device {} \n **************** \n'.format(i+1))
                 # print( 'pass count progress {}'.format( self.other_pass_progress ) )
                 # print( 'len( self.other_dev_latlon[i+1] )   {}'.format( len( self.other_dev_latlon[i+1] ) ) )
-                while self.other_pass_progress[i] < len( self.other_dev_latlon[i+1] )-1:
-                    # get the lat lon , lat lon last 
-                    # print( '\n ****************\n  device {} \n{} \n{}  \n**************** \n'.format(i+1, self.other_pass_progress[i], len(self.other_dev_latlon[i+1]) ) )
-                    # print( self.other_dev_latlon[i+1][self.other_pass_progress[i] +1 ] )
-                    lat           = self.other_dev_latlon[i+1][self.other_pass_progress[i] +1 ][0]
-                    lon           = self.other_dev_latlon[i+1][self.other_pass_progress[i] +1 ][1]
-                    last_lat      = self.other_dev_latlon[i+1][self.other_pass_progress[i] +0 ][0]
-                    last_lon      = self.other_dev_latlon[i+1][self.other_pass_progress[i] +0 ][1]
-                    last_last_lat = self.other_dev_latlon[i+1][self.other_pass_progress[i] -1 ][0]
-                    last_last_lon = self.other_dev_latlon[i+1][self.other_pass_progress[i] -1 ][1]
+                if i != 0 and i != self.my_id:
+                    # while self.other_pass_progress[i] < len( self.other_dev_latlon[i+1] )-1:
+                    while self.other_pass_progress[i] <= len( self.other_dev_latlon[i] )-1:    
+                        # get the lat lon , lat lon last 
+                        # print( '\n ****************\n  device {} \n{} \n{}  \n**************** \n'.format(i+1, self.other_pass_progress[i], len(self.other_dev_latlon[i+1]) ) )
+                        # print( self.other_dev_latlon[i+1][self.other_pass_progress[i] +1 ] )
 
-                    # get the uv 
-                    machine_u, machine_v                     = self.latlonToImgpixel( lat= lat,            lon= lon )
-                    last_machine_u, last_machine_v           = self.latlonToImgpixel( lat= last_lat,       lon= last_lon )
-                    last_last_machine_u, last_last_machine_v = self.latlonToImgpixel( lat= last_last_lat , lon= last_last_lon )
+                        # lat           = self.other_dev_latlon[i+1][ self.other_pass_progress[i] +1 ][0]
+                        # lon           = self.other_dev_latlon[i+1][ self.other_pass_progress[i] +1 ][1]
+                        # last_lat      = self.other_dev_latlon[i+1][ self.other_pass_progress[i] +0 ][0]
+                        # last_lon      = self.other_dev_latlon[i+1][ self.other_pass_progress[i] +0 ][1]
+                        # last_last_lat = self.other_dev_latlon[i+1][ self.other_pass_progress[i] -1 ][0]
+                        # last_last_lon = self.other_dev_latlon[i+1][ self.other_pass_progress[i] -1 ][1]
 
-                    self.other_dev_uv[i+1] = [ machine_u, machine_v ]
+                        lat           = self.other_dev_latlon[i][ self.other_pass_progress[i]  ][0]
+                        lon           = self.other_dev_latlon[i][ self.other_pass_progress[i]  ][1]
+                        last_lat      = self.other_dev_latlon[i][ self.other_pass_progress[i] -1 ][0]
+                        last_lon      = self.other_dev_latlon[i][ self.other_pass_progress[i] -1 ][1]
+                        last_last_lat = self.other_dev_latlon[i][ self.other_pass_progress[i] -2 ][0]
+                        last_last_lon = self.other_dev_latlon[i][ self.other_pass_progress[i] -2 ][1]
 
-                    # update grid
-                    self.update_grid( machine_u, machine_v, last_machine_u, last_machine_v, last_last_machine_u,  last_last_machine_v, 'other' )
+                        # get the uv 
+                        machine_u, machine_v                     = self.latlonToImgpixel( lat= lat,            lon= lon )
+                        last_machine_u, last_machine_v           = self.latlonToImgpixel( lat= last_lat,       lon= last_lon )
+                        last_last_machine_u, last_last_machine_v = self.latlonToImgpixel( lat= last_last_lat , lon= last_last_lon )
 
-                    self.other_pass_progress[i] += 1
-        
+                        self.other_dev_uv[i+1] = [ machine_u, machine_v ]
+
+                        # update grid
+                        self.update_grid( machine_u, machine_v, last_machine_u, last_machine_v, last_last_machine_u,  last_last_machine_v, 'other' )
+
+                        self.other_pass_progress[i] += 1
+            
 
 
     # ==========================================================
@@ -476,6 +495,7 @@ class gps2grid():
             
             the_u = int(map_roi.shape[1]/2) + u_from_center
             the_v = int(map_roi.shape[0]/2) + v_from_center
+            print('id: {}  u:{}   v:{}'.format( i, the_u , the_v  ))
             # if abs(the_u) < map_roi.shape[1]/2 or abs(the_v) < map_roi.shape[0]/2:
                 # add_icon(self.icon_other, self.roller_orientation , ( the_u, the_v), roi_resized)
                 # cv2.circle( map_roi, ( the_u, the_v), 5, (255,0,0), -1 )
@@ -503,8 +523,11 @@ class gps2grid():
 
         # add my roller icon at location of gps 
         add_icon(self.icon, self.roller_orientation , (int(self.actual_visible_size_u/2), int(self.actual_visible_size_v/2) ), roi_resized)
+        print('add my icon')
         for i in range(len(other_uv)):
-            add_icon(self.icon_other, self.roller_orientation , ( resized_other_uv[i][0], resized_other_uv[i][1] ), roi_resized)
+            if i != self.my_id:
+                add_icon(self.icon_other, self.roller_orientation , ( resized_other_uv[i][0], resized_other_uv[i][1] ), roi_resized)
+                print('add device icon {}'.format(i))
             # cv2.circle( roi_resized, ( resized_other_uv[i][0], resized_other_uv[i][1] ), 5, (255,0,0), -1 )
 
         # add lengend 
@@ -553,6 +576,14 @@ class gps2grid():
         dv = new_v - last_v
         orientation = math.atan2(dv,du) * -1
         self.roller_orientation = orientation * 180.0 / np.pi
+
+        print( ' computed angle: {} ; last angle: {} '.format( self.roller_orientation , self.roller_orientation_last ) )
+
+        # if abs(self.roller_orientation - self.roller_orientation_last ) > 80:
+        # if abs(du) + abs(dv) < 4:
+        #     self.roller_orientation = self.roller_orientation_last
+
+        # self.roller_orientation_last = self.roller_orientation
 
         corners = np.zeros((4,2)).astype(np.int)
 
